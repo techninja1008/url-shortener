@@ -51,10 +51,16 @@ func encodeHandler(response http.ResponseWriter, request *http.Request, db Datab
 	decoder := json.NewDecoder(request.Body)
 	var data struct {
 		URL string `json:"url"`
+		Secret string `json:"secret"`
 	}
 	err := decoder.Decode(&data)
 	if err != nil {
 		http.Error(response, `{"error": "Unable to parse json"}`, http.StatusBadRequest)
+		return
+	}
+	
+	if data.Secret != os.Getenv("SECRET") {
+		http.Error(response, `{"error": "Incorrect Secret"}`, http.StatusBadRequest)
 		return
 	}
 
@@ -84,6 +90,9 @@ func main() {
 	}
 	if os.Getenv("DB_PATH") == "" {
 		log.Fatal("DB_PATH environment variable must be set")
+	}
+	if os.Getenv("SECRET") == "" {
+		log.Fatal("SECRET environment variable must be set")
 	}
 	db := sqlite{Path: path.Join(os.Getenv("DB_PATH"), "db.sqlite")}
 	db.Init()
