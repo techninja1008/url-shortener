@@ -38,6 +38,7 @@ func decode(s string) int {
 
 func decodeHandler(response http.ResponseWriter, request *http.Request, db Database) {
 	id := decode(mux.Vars(request)["id"])
+	id -= 1000000
 	url, err := db.Get(id)
 	if err != nil {
 		http.Error(response, `{"error": "No such URL"}`, http.StatusNotFound)
@@ -67,6 +68,8 @@ func encodeHandler(response http.ResponseWriter, request *http.Request, db Datab
 		log.Println(err)
 		return
 	}
+	
+	id += 1000000
 
 	resp := map[string]string{"url": baseURL + encode(id), "id": encode(id), "error": ""}
 	jsonData, _ := json.Marshal(resp)
